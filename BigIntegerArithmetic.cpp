@@ -182,12 +182,14 @@ string karatsuba(string num1, string num2)
     string low2 = num2.substr(num2.length() - halfLength);
 
     // 3 recursive calls
-    string z0 = karatsuba(low1, low2);
-    string z1 = karatsuba(add(low1, high1), add(low2, high2));
-    string z2 = karatsuba(high1, high2);
+
+    string p1 = karatsuba(high1, high2);
+    string p2 = karatsuba(low1, low2);
+    string p3 = karatsuba(add(low1, high1), add(low2, high2));
+    string mid = subtract(subtract(p3, p2), p1);
 
     // Combine the results
-    string result = add(add(z2 + string(halfLength * 2, '0'), subtract(z1, add(z2, z0)) + string(halfLength, '0')), z0);
+    string result = add(add((p1 + string(2 * halfLength, '0')),(mid + string(halfLength, '0'))),p3);
 
     return result;
 }
