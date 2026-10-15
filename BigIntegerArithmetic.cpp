@@ -16,6 +16,10 @@ string multiply(string num1, string num2); // nhân bằng Schoolbook
 string karatsuba(string num1, string num2);//Nhân bằng Karatsuba
 void benchmark(string num1, string num2, string (*func)(string, string), const string& funcName, ofstream& output);//Đo thời gian thực thi
 bool readInput(ifstream& input, string& num1, string& num2);//Đọc dữ liệu từ file test
+string multiplySigned(string num1,string num2,string (*func)(string, string));
+string multiplySignedSchoolbook(string num1, string num2);
+string multiplySignedKaratsuba(string num1, string num2);
+bool normalizeNumber(string& num);
 
 
 int main(void)// void trong dấu ngoặc: hàm không nhận tham số.
@@ -30,17 +34,29 @@ int main(void)// void trong dấu ngoặc: hàm không nhận tham số.
     }
 
     string folderName = "test\\"; //folderName lưu tên thư mục chứa các file test.
-    string testFiles[] = 
-    {
-        "test100digits.txt", //testFiles[0]
-        "test10000digits.txt",
-        "test100000digits.txt",
-        "test3digits.txt",
-        "testDuplicateValues.txt",
-        "testEmptyInput.txt",
-        "testSingleElement.txt",
-        "testDuplicateDigitsValues.txt"
-    };
+    string testFiles[] =
+{
+    // Week 1
+    "test100digits.txt",
+    "test10000digits.txt",
+    "test100000digits.txt",
+    "test3digits.txt",
+    "testDuplicateValues.txt",
+    "testEmptyInput.txt",
+    "testSingleElement.txt",
+    "testDuplicateDigitsValues.txt",
+
+    // Week 2 - Negative numbers
+    "testNegativePositive.txt",
+    "testPositiveNegative.txt",
+    "testNegativeNegative.txt",
+    "testNegativeZero.txt",
+
+    // Week 2 - Input validation
+    "testLeadingZeros.txt",
+    "testInvalidCharacters.txt",
+    "testInvalidSign.txt"
+};
     // duyệt từng file test
     for(int i = 0; i < sizeof(testFiles) / sizeof(testFiles[0]); ++i)  //for (int i = 0; i < 8; i++)
     {
@@ -54,8 +70,9 @@ int main(void)// void trong dấu ngoặc: hàm không nhận tham số.
         if (readInput(input, num1, num2)) // nhận file đang mở, đọc hai dòng và lưu vào num1, num2  => nó trả về bool
         {
             // nếu true, gọi benchmark() hai lần
-            benchmark(num1, num2, &multiply, "multiply", output); // Đo thời gian nhân bằng Schoolbook
-            benchmark(num1, num2, &karatsuba, "karatsuba", output); // Đo thời gian nhân bằng Karatsuba
+            benchmark(num1, num2, &multiplySignedSchoolbook, "multiply", output); // Đo thời gian nhân bằng Schoolbook
+            benchmark(num1, num2, &multiplySignedKaratsuba, "karatsuba", output); // Đo thời gian nhân bằng Karatsuba
+            
         }
         else
         {
@@ -248,7 +265,85 @@ string karatsuba(string num1, string num2)
 
     return result;
 }
+//HÀM XỬ LÝ DẤU ÂM
+string multiplySigned(string num1,string num2,string (*func)(string, string))
+{
+//string (*func)(string, string) - con trỏ hàm :cho phép truyền một hàm khác vào multiplySigned()
+    // Kiểm tra số thứ nhất có dấu âm không
+    bool negative1 = !num1.empty() && num1[0] == '-';
 
+    // Kiểm tra số thứ hai có dấu âm không
+    bool negative2 = !num2.empty() && num2[0] == '-';
+
+    // Nếu có dấu âm thì xóa dấu âm ở đầu chuỗi
+    if (negative1)
+        num1.erase(0, 1);
+//string.erase(start, length);
+    if (negative2)
+        num2.erase(0, 1);
+
+    // Nhân hai giá trị không âm bằng thuật toán được truyền vào
+    string result = func(num1, num2);
+
+    // Nếu kết quả bằng 0 thì không thêm dấu âm
+    if (result == "0")
+        return "0";
+
+    // Nếu đúng một số âm thì kết quả âm
+    if (negative1 != negative2)
+        result = "-" + result;
+
+    return result;
+}
+    // Hàm trung gian để benchmark gọi Schoolbook có xử lý dấu
+    string multiplySignedSchoolbook(string num1, string num2)
+    {
+        return multiplySigned(num1, num2, &multiply);
+    }
+
+    // Hàm trung gian để benchmark gọi Karatsuba có xử lý dấu
+    string multiplySignedKaratsuba(string num1, string num2)
+    {
+        return multiplySigned(num1, num2, &karatsuba);
+    }
+    // Kiểm tra số nguyên hợp lệ và xóa các số 0 thừa ở đầu
+bool normalizeNumber(string& num)
+{
+    // Không chấp nhận chuỗi rỗng
+    if (num.empty())
+        return false;
+
+    // Kiểm tra số có dấu âm hay không
+    bool negative = (num[0] == '-');
+
+    // Nếu có dấu âm thì bắt đầu kiểm tra từ vị trí 1
+    int start = negative ? 1 : 0;
+
+    // Trường hợp chỉ có dấu "-" mà không có chữ số
+    if (start == num.length())
+        return false;
+
+    // Kiểm tra từng ký tự có phải chữ số từ 0 đến 9 không
+    for (int i = start; i < num.length(); i++)
+    {
+        if (num[i] < '0' || num[i] > '9')
+            return false;
+    }
+
+    // Xóa dấu âm tạm thời để xử lý phần chữ số
+    if (negative)
+        num.erase(0, 1);
+
+    // Xóa các số 0 thừa ở đầu, nhưng giữ lại ít nhất 1 chữ số
+    while (num.length() > 1 && num[0] == '0')
+        num.erase(0, 1);
+
+    // Nếu số khác 0 và ban đầu có dấu âm thì thêm dấu âm trở lại
+    if (negative && num != "0")
+        num = "-" + num;
+
+    return true;
+}
 void benchmark(string num1, string num2, string (*func)(string, string), const string& funcName, ofstream& output)
 {
     string result; // Call the function once to get the result
@@ -265,6 +360,7 @@ void benchmark(string num1, string num2, string (*func)(string, string), const s
     output << "Execution time: " << duration.count() << " seconds" << endl;
     output << "----------------------------------------" << endl;
 }
+
 
 bool readInput(ifstream& input, string& num1, string& num2)
 {
@@ -285,6 +381,12 @@ bool readInput(ifstream& input, string& num1, string& num2)
     //num1.empty() : chuỗi num1 rỗng
     {
         cerr << "Input file must contain two non-empty lines." << endl;
+        return false;
+    }
+    // Kiểm tra và chuẩn hóa cả hai số
+    if (!normalizeNumber(num1) || !normalizeNumber(num2))
+    {
+        cerr << "Invalid integer input." << endl;
         return false;
     }
 
