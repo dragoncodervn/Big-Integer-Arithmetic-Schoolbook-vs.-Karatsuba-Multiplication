@@ -242,8 +242,9 @@ string karatsuba(string num1, string num2)
     string p3 = karatsuba(add(low1, high1), add(low2, high2)); // (high1 + low1) * (high2 + low2)
     string mid = subtract(subtract(p3, p2), p1);// Tính phần giữa: mid = p3 - p2 - p1
     
-    // Ghép kết quả theo các hàng của phép nhân
-    string result = add(add((p1 + string(2 * halfLength, '0')),(mid + string(halfLength, '0'))),p3);
+    // Ghép kết quả theo các hàng của phép nhân 
+    //theo công thức Karatsuba:p1 * 10^(2m) + mid * 10^m + p2
+    string result = add(add((p1 + string(2 * halfLength, '0')),(mid + string(halfLength, '0'))),p2);
 
     return result;
 }
