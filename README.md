@@ -1,33 +1,74 @@
-# Big-Integer-Arithmetic-Schoolbook-vs.-Karatsuba-Multiplication
+# Big Integer Arithmetic: Schoolbook vs. Karatsuba Multiplication
+## Project Overview
+This is the final project for the Data Structures and Algorithms (DSA) course at HCMUTE.
+The project implements and compares two big integer multiplication algorithms:
+- **Schoolbook:** O(n²) time complexity.
+- **Karatsuba:** O(n^1.585) time complexity.
+Both algorithms operate on integers represented as strings. The program measures their execution times and saves the results to `output.txt`.
 
-## What did we do?
-This is the final project for DSA at HCMUTE
-We have create 7 functions for evaluate the benchmark of O(n^2) muliply and karatsuba multiply.
-- add() is the funcion for summing 2 values in type string (needed for the karatsuba function).
-- subtract() is the function for subtracting 2 values in types string(needed for the karatsuba function).
-    + subtractPositive() and compareNumbers() is 2 assistant function for subtract() 
-- multiply() is the function for multiply 2 numbers in type string by O(n^2) way.
-- karatsuba() is the function for multply 2 numbers in type string by karasuba way.
-    + karatsuba is the methods to avoid O(n^2) when multiflying 2 big numbers in computer.
-- benchmark() is the function for evaluate the runtime of 2 multifly functions and print the results.
+## What Did We Do?
 
-## How to compile & run the program
+### Week 1 – Basic Implementation
+
+- `add()`: Adds two non-negative integer strings.
+- `subtract()`: Subtracts integer strings, supported by `subtractPositive()` and `compareNumbers()`.
+- `multiply()`: Performs Schoolbook multiplication.
+- `karatsuba()`: Performs multiplication using divide and conquer.
+- `benchmark()`: Measures execution time and records results.
+
+### Week 2 – Negative Input Handling
+
+Extended the program to support negative integers and validate input data.
+
+- `multiplySigned()`: Handles operand signs and determines the sign of the result.
+- `multiplySignedSchoolbook()`: Integrates signed multiplication with Schoolbook.
+- `multiplySignedKaratsuba()`: Integrates signed multiplication with Karatsuba.
+- `normalizeNumber()`: Validates input, removes leading zeros, and converts `-000` to `0`.
+- `readInput()`: Updated to reject invalid input.
+- `main()`: Updated to benchmark both signed multiplication functions.
+- **Bug fix:** Corrected the Karatsuba result combination by replacing `p3` with `p2`.
+
+## How to Compile & Run
+
 ### Compile
+
+Windows:
 ```cmd
-g++ BigIntergerArithmetic.cpp -o BigIntergerArithmetic
+g++ BigIntegerArithmetic.cpp -o BigIntegerArithmetic.exe
+```
+
+Linux:
+```bash
+g++ BigIntegerArithmetic.cpp -o BigIntegerArithmetic
 ```
 
 ### Run
-On Windows - Terminal/Command Prompt: 
-```cmd
-BigIntergerArithmetic.exe
+
+Windows (PowerShell):
+```powershell
+.\BigIntegerArithmetic.exe
 ```
 
-On Linux - Terminal:
-```terminal
-./BigIntergerArithmetic
+Linux:
+```bash
+./BigIntegerArithmetic
 ```
 
-### Adding test-case for the program
-From line 32 to 41, in the string-array named testFiles, add the name of the .txt (the test-case file) you want into the array.
-Then, recompile the program and run as normal. 
+Results are saved to `output.txt`.
+
+## Adding Test Cases
+
+1. Create a `.txt` file in the `test/` folder.
+2. Enter two integers, one per line.
+3. Add the file name to the `testFiles` array in `main()`.
+4. Recompile and run the program.
+
+Example:
+```text
+-123
+45
+```
+Invalid inputs such as `12a3` or `--123` are skipped.
+## Week 2 – Testing Results
+**Result:** All 8 test cases passed for the implemented Week 2 features.
+
