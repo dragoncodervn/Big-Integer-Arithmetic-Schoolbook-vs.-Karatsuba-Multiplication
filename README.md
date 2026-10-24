@@ -125,3 +125,38 @@ Kết quả của Schoolbook và Karatsuba có thể đối chiếu với nhau �
 - Phải chạy chương trình từ thư mục gốc của dự án để đường dẫn tương đối `test\...` hoạt động.
 - Mỗi lần chạy chế độ test, `output.txt` được mở ở chế độ ghi mới nên kết quả cũ sẽ bị ghi đè.
 - Nếu chương trình không tìm thấy tệp test, hãy kiểm tra thư mục hiện tại và bảo đảm thư mục `test\` tồn tại.
+
+
+## Week 3 – Large Integer Testing & Benchmark
+
+### 1. Work Completed
+- Created `generateTests.cpp` to generate reproducible large-number test cases using a fixed random seed (`2026`).
+- Added three test files: `test1000digits.txt`, `test5000digits.txt`, and `test20000digits.txt`.
+- Updated `BigIntegerArithmetic.cpp` to run 18 test files.
+- Updated `output.txt` with the complete test results.
+
+### 2. Testing Results
+- Total: 18 test files.
+- Valid cases: 14 PASS, 0 FAIL (Schoolbook and Karatsuba produced identical results).
+- Invalid/incomplete cases: 4 skipped.
+
+### 3. Performance Comparison
+
+| Digits | Schoolbook (s) | Karatsuba (s) | Speedup |
+|---|---:|---:|---:|
+| 1,000 | 0.00260 | 0.00225 | 1.16× |
+| 5,000 | 0.07285 | 0.03037 | 2.40× |
+| 10,000 | 0.25011 | 0.13294 | 1.88× |
+| 20,000 | 1.02387 | 0.39301 | 2.61× |
+| 100,000 | 24.21490 | 5.35360 | 4.52× |
+
+*Times are from individual benchmark runs, not averages.*
+
+### 4. Conclusion
+Karatsuba outperformed Schoolbook in all five measured cases. At 100,000 digits, Karatsuba was approximately **4.52 times faster**.
+
+The results are consistent with the theoretical complexities:
+- Schoolbook: `O(n²)`
+- Karatsuba: `O(n^1.585)`
+
+Inputs containing `10^20` digits were not tested due to hardware and storage limitations.

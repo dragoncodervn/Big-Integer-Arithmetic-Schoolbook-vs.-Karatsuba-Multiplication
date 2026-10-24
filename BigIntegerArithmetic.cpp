@@ -32,27 +32,33 @@ int main(int argc, char **argv)
 
         string folderName = "test\\"; // folderName lưu tên thư mục chứa các file test.
         string testFiles[] =
-            {
-                // Week 1
-                "test100digits.txt",
-                "test10000digits.txt",
-                "test100000digits.txt",
-                "test3digits.txt",
-                "testDuplicateValues.txt",
-                "testEmptyInput.txt",
-                "testSingleElement.txt",
-                "testDuplicateDigitsValues.txt",
+{
+    // Week 1
+    "test3digits.txt",
+    "test100digits.txt",
+    "testDuplicateValues.txt",
+    "testEmptyInput.txt",
+    "testSingleElement.txt",
+    "testDuplicateDigitsValues.txt",
 
-                // Week 2 - Negative numbers
-                "testNegativePositive.txt",
-                "testPositiveNegative.txt",
-                "testNegativeNegative.txt",
-                "testNegativeZero.txt",
+    // Week 2 - Negative numbers
+    "testNegativePositive.txt",
+    "testPositiveNegative.txt",
+    "testNegativeNegative.txt",
+    "testNegativeZero.txt",
 
-                // Week 2 - Input validation
-                "testLeadingZeros.txt",
-                "testInvalidCharacters.txt",
-                "testInvalidSign.txt"};
+    // Week 2 - Input validation
+    "testLeadingZeros.txt",
+    "testInvalidCharacters.txt",
+    "testInvalidSign.txt",
+
+    // Week 3 - Large integer benchmark
+    "test1000digits.txt",
+    "test5000digits.txt",
+    "test10000digits.txt",
+    "test20000digits.txt",
+    "test100000digits.txt"
+};
         // duyệt từng file test
         for (int i = 0; i < sizeof(testFiles) / sizeof(testFiles[0]); ++i) // for (int i = 0; i < 8; i++)
         {
