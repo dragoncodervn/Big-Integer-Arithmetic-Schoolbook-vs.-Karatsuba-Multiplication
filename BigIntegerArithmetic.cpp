@@ -4,6 +4,8 @@
 
 int main(int argc, char **argv)
 {
+    vector<size_t> cutoffs = {2, 4, 8, 16, 24, 32, 48, 64, 96, 128, 192, 256, 512};
+
     if (argc == 3)
     {
         string num1, num2;
@@ -12,7 +14,11 @@ int main(int argc, char **argv)
         if (readInput(num1, num2)) // kiểm tra và chuẩn hóa hai tham số
         {
             benchmark(num1, num2, &multiplySignedSchoolbook, "multiply"); // Đo thời gian nhân bằng Schoolbook
-            benchmark(num1, num2, &multiplySignedKaratsuba, "karatsuba"); // Đo thời gian nhân bằng Karatsuba
+            for (size_t cutoff : cutoffs)
+            {
+                cout << "Cutoff: " << cutoff << endl;
+                benchmark(num1, num2, &multiplySignedKaratsuba, "karatsuba", cutoff); // Đo thời gian nhân bằng Karatsuba
+            }
         }
         else
         {
@@ -73,7 +79,11 @@ int main(int argc, char **argv)
             {
                 // nếu true, gọi benchmark() hai lần
                 benchmark(num1, num2, &multiplySignedSchoolbook, "multiply", output); // Đo thời gian nhân bằng Schoolbook
-                benchmark(num1, num2, &multiplySignedKaratsuba, "karatsuba", output); // Đo thời gian nhân bằng Karatsuba
+                for (size_t cutoff : cutoffs)
+                {
+                    output << "Cutoff: " << cutoff << endl;
+                    benchmark(num1, num2, &multiplySignedKaratsuba, "karatsuba", cutoff, output); // Đo thời gian nhân bằng Karatsuba
+                }
             }
             else
             {
