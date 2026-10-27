@@ -1,8 +1,21 @@
 #include "karatsuba.hpp"
 #include "handleInput.hpp"
+#include <stdexcept>
+
+namespace
+{
+    string normalizeUnsigned(const string& num)
+    {
+        size_t firstDigit = num.find_first_not_of('0');
+        return firstDigit == string::npos ? "0" : num.substr(firstDigit);
+    }
+}
 
 string add(string num1, string num2)
 {
+    num1 = normalizeUnsigned(num1);
+    num2 = normalizeUnsigned(num2);
+
     string result = ""; // chuỗi rỗng để lưu kết quả phép cộng
     int carry = 0; // số nhớ khi cộng
     //bắt đầu từ chữ số cuối cùng (hàng đơn vị)
@@ -27,22 +40,27 @@ string add(string num1, string num2)
         //sum % 10 lấy chữ số hàng đơn vị. Ví dụ 15 % 10 = 5.
         //insert(result.begin(), ...) chèn chữ số vào đầu chuỗi kết quả.; chèn vào đầu vì ta đang tính từ phải sang trái
     }
-    return result;
+    return normalizeUnsigned(result);
 }
 
 
 string subtractPositive(const string& num1, const string& num2) // trừ từng chữ số 
 {
+    string normalizedNum1 = normalizeUnsigned(num1);
+    string normalizedNum2 = normalizeUnsigned(num2);
+    if (compareNumbers(normalizedNum1, normalizedNum2) < 0)
+        throw invalid_argument("subtractPositive requires the first operand to be greater than or equal to the second.");
+
     string result;
     int borrow = 0;
-    int i = num1.length() - 1;
-    int j = num2.length() - 1;
+    int i = static_cast<int>(normalizedNum1.length()) - 1;
+    int j = static_cast<int>(normalizedNum2.length()) - 1;
 
     while (i >= 0)
     {
-        int diff = (num1[i] - '0') - borrow;//Lấy chữ số hiện tại của num1, chuyển thành số nguyên rồi trừ đi số mượn.
+        int diff = (normalizedNum1[i] - '0') - borrow;//Lấy chữ số hiện tại của num1, chuyển thành số nguyên rồi trừ đi số mượn.
         if (j >= 0) // nếu num2 còn chữ số thì tiếp tục trừ
-            diff -= (num2[j--] - '0');
+            diff -= (normalizedNum2[j--] - '0');
         
         if (diff < 0) // nếu hiệu âm thì phải mượn 1 từ hàng bên trái
         {
@@ -62,7 +80,9 @@ string subtractPositive(const string& num1, const string& num2) // trừ từng 
     while (result.length() > 1 && result[0] == '0')
         result.erase(result.begin());
 
-    return result;
+    if (borrow != 0)
+        throw logic_error("subtractPositive ended with an unhandled borrow.");
+    return normalizeUnsigned(result);
 }
 // So sánh hai số không âm, quyết định thứ tự trừ và dấu của kết quả
 // subtractPositive("123", "45"); // "78"
@@ -70,6 +90,9 @@ string subtractPositive(const string& num1, const string& num2) // trừ từng 
 // subtract("45", "123"); // "-78"
 string subtract(string num1, string num2) // // Trừ hai số không âm và xác định dấu kết quả
 {
+    num1 = normalizeUnsigned(num1);
+    num2 = normalizeUnsigned(num2);
+
     // Hai số bằng nhau thì hiệu bằng 0
     if (compareNumbers(num1, num2) == 0) 
         return "0";
@@ -77,7 +100,8 @@ string subtract(string num1, string num2) // // Trừ hai số không âm và x�
     if (compareNumbers(num1, num2) > 0)
         return subtractPositive(num1, num2);
     //// Nếu num1 nhỏ hơn thì đổi thứ tự trừ rồi thêm dấu âm
-    return "-" + subtractPositive(num2, num1);
+    string difference = subtractPositive(num2, num1);
+    return difference == "0" ? "0" : "-" + difference;
 }
 //subtractPositive() thực hiện phép trừ từng chữ số bằng cách xử lý borrow
 //subtract() dùng compareNumbers() để xác định thứ tự phép trừ và dấu kết quả
@@ -98,7 +122,9 @@ string karatsuba(string num1, string num2, int cutoff)
     if (cutoff <= 0)
         throw invalid_argument("Karatsuba cutoff must be greater than zero.");
 
-    if (num1.empty() || num2.empty() || num1 == "0" || num2 == "0")
+    num1 = normalizeUnsigned(num1);
+    num2 = normalizeUnsigned(num2);
+    if (num1 == "0" || num2 == "0")
         return "0";
     //base case
     // Với số nhỏ hơn hoặc bằng cutoff chữ số, dùng Schoolbook

@@ -122,6 +122,15 @@ Kết quả của Schoolbook và Karatsuba có thể đối chiếu với nhau �
 4. Biên dịch lại chương trình.
 5. Chạy `BigIntegerArithmetic.exe` và xem kết quả trong `output.txt`.
 
+### Kiểm thử hồi quy cutoff Karatsuba
+
+Biên dịch và chạy kiểm thử hồi quy riêng (bao gồm trường hợp cutoff 2 gây lỗi trước đây, số ngẫu nhiên 3–12 chữ số và đầu vào lớn):
+
+```cmd
+g++ -std=c++11 test\karatsubaCutoffRegression.cpp karatsuba.cpp schoolbookMultiply.cpp handleInput.cpp -o karatsubaCutoffRegression.exe
+karatsubaCutoffRegression.exe
+```
+
 ## Lưu ý
 
 - Phải chạy chương trình từ thư mục gốc của dự án để đường dẫn tương đối `test\...` hoạt động.

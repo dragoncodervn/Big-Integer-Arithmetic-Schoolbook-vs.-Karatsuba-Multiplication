@@ -6,15 +6,18 @@
 //Trả về -1 nếu num1 nhỏ hơn, 0 nếu bằng, 1 nếu lớn hơn
 int compareNumbers(const string& num1, const string& num2)
 {
-    //// Số nào có nhiều chữ số hơn thì lớn hơn
-    if (num1.length() != num2.length())
-        return num1.length() < num2.length() ? -1 : 1;
-//condition ? valueIfTrue : valueIfFalse;
-    //// Nếu hai chuỗi giống nhau thì hai số bằng nhau
-    if (num1 == num2)
+    size_t start1 = num1.find_first_not_of('0');
+    size_t start2 = num2.find_first_not_of('0');
+    size_t length1 = start1 == string::npos ? 0 : num1.length() - start1;
+    size_t length2 = start2 == string::npos ? 0 : num2.length() - start2;
+
+    if (length1 != length2)
+        return length1 < length2 ? -1 : 1;
+    if (length1 == 0)
         return 0;
-    //// Nếu cùng độ dài thì so sánh từ trái sang phải
-    return num1 < num2 ? -1 : 1;
+
+    int comparison = num1.compare(start1, length1, num2, start2, length2);
+    return comparison < 0 ? -1 : comparison > 0 ? 1 : 0;
 }
 /*
 Tại sao cần hàm so sánh? Trong Karatsuba, chương trình cần thực hiện các phép trừ trung gian
