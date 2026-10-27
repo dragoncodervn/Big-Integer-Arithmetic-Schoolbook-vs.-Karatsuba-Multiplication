@@ -7,6 +7,8 @@ So sánh phép nhân số nguyên rất lớn bằng hai thuật toán:
 
 Chương trình biểu diễn số bằng `std::string`, vì vậy không phụ thuộc vào giới hạn của các kiểu số nguyên dựng sẵn. Chương trình hỗ trợ số dương, số âm, số 0, số có các chữ số 0 ở đầu và kiểm tra ký tự đầu vào không hợp lệ.
 
+Karatsuba dùng Schoolbook khi một trong hai toán hạng có độ dài nhỏ hơn hoặc bằng `cutoff`. Giá trị mặc định là 32 chữ số (`DEFAULT_KARATSUBA_CUTOFF`); có thể thay đổi giá trị `cutoff` trong `BigIntegerArithmetic.cpp` để benchmark với ngưỡng khác. `cutoff` phải lớn hơn 0.
+
 ## Cấu trúc chính
 
 | Tệp | Chức năng |

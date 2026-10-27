@@ -93,13 +93,16 @@ string subtract(string num1, string num2) // // Trừ hai số không âm và x�
 // ----------
 //   5535  //Ta nhân từng chữ số của số thứ hai với số thứ nhất, rồi cộng các tích theo đúng hàng.
 
-string karatsuba(string num1, string num2)
+string karatsuba(string num1, string num2, int cutoff)
 {
+    if (cutoff <= 0)
+        throw invalid_argument("Karatsuba cutoff must be greater than zero.");
+
     if (num1.empty() || num2.empty() || num1 == "0" || num2 == "0")
         return "0";
     //base case
-    // Với số nhỏ (<= 32 chữ số), dùng Schoolbook
-    if (num1.length() <= 32 || num2.length() <= 32)
+    // Với số nhỏ hơn hoặc bằng cutoff chữ số, dùng Schoolbook
+    if (num1.length() <= cutoff || num2.length() <= cutoff)
         return multiply(num1, num2);
     //Tìm độ dài lớn nhất của hai số
     size_t maxLength = max(num1.length(), num2.length());
@@ -120,9 +123,9 @@ string karatsuba(string num1, string num2)
 
     // 3 recursive calls
 
-    string p1 = karatsuba(high1, high2);// high1 * high2
-    string p2 = karatsuba(low1, low2);// low1 * low2
-    string p3 = karatsuba(add(low1, high1), add(low2, high2)); // (high1 + low1) * (high2 + low2)
+    string p1 = karatsuba(high1, high2, cutoff);// high1 * high2
+    string p2 = karatsuba(low1, low2, cutoff);// low1 * low2
+    string p3 = karatsuba(add(low1, high1), add(low2, high2), cutoff); // (high1 + low1) * (high2 + low2)
     string mid = subtract(subtract(p3, p2), p1);// Tính phần giữa: mid = p3 - p2 - p1
     
     // Ghép kết quả theo các hàng của phép nhân 
