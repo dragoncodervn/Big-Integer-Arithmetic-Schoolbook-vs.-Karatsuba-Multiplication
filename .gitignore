@@ -1,0 +1,4 @@
+# Ignore generated executables
+/generateTests.exe
+/week4Test.exe
+/generateExactTests.exe

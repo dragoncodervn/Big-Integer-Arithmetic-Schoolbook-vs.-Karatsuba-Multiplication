@@ -1,0 +1,96 @@
+﻿WEEK 4 - LARGE-SCALE TESTING RESULTS
+
+Algorithm: Karatsuba Multiplication
+Cutoff: 64
+Language: C++
+Timing: std::chrono::high_resolution_clock
+
+1. LARGE-SCALE TESTS
+
+Test: test200000digits.txt
+Input digits: 200000 x 200000
+Pattern: Random digits
+Result length: 399999
+Execution time: 19.3369 seconds
+Length check: PASS
+Modulo verification: PASS
+Schoolbook comparison: SKIPPED
+Overall: PASS
+
+Test: test300000digits.txt
+Input digits: 300000 x 300000
+Pattern: Repeated digits
+Result length: 600000
+Execution time: 50.2301 seconds
+Length check: PASS
+Modulo verification: PASS
+Schoolbook comparison: SKIPPED
+Overall: PASS
+
+Test: test500000digits.txt
+Input digits: 500000 x 500000
+Pattern: Many zeros
+Result length: 1000000
+Execution time: 141.598 seconds
+Length check: PASS
+Modulo verification: PASS
+Schoolbook comparison: SKIPPED
+Overall: PASS
+
+Test: test750000digits.txt
+Input digits: 750000 x 750000
+Pattern: Random digits
+Result length: 1500000
+Execution time: 465.276 seconds
+Length check: PASS
+Modulo verification: PASS
+Schoolbook comparison: SKIPPED
+Overall: PASS
+
+Test: test1000000digits.txt
+Input digits: 1000000 x 1000000
+Pattern: Existing test data
+Result length: 1999999
+Execution time: 537.903 seconds
+Length check: PASS
+Modulo verification: PASS
+Schoolbook comparison: SKIPPED
+Overall: PASS
+
+2. EXACT-RESULT TESTS
+
+Test: test100000Identity.txt
+Input digits: 100000 x 1
+Result length: 100000
+Execution time: 0.001307 seconds
+Exact result comparison: PASS
+Length check: PASS
+Modulo verification: PASS
+Overall: PASS
+
+Test: test200000PowerOfTen.txt
+Input digits: 200000 x 200000
+Result length: 399999
+Execution time: 7.6712 seconds
+Exact result comparison: PASS
+Length check: PASS
+Modulo verification: PASS
+Overall: PASS
+
+Test: test1000000Identity.txt
+Input digits: 1000000 x 1
+Result length: 1000000
+Execution time: 0.0158476 seconds
+Exact result comparison: PASS
+Length check: PASS
+Modulo verification: PASS
+Overall: PASS
+
+3. NOTES
+
+- All execution times are from individual runs, not averages.
+- Large-scale tests passed length and modular verification.
+- Modular verification does not guarantee exact correctness.
+- Exact-result tests compared the complete output with known results.
+- Schoolbook comparison was skipped for large inputs.
+- The original output.txt was not modified.

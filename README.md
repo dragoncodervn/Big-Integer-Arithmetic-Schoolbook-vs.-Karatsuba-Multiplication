@@ -171,3 +171,70 @@ The results are consistent with the theoretical complexities:
 - Karatsuba: `O(n^1.585)`
 
 Inputs containing `10^20` digits were not tested due to hardware and storage limitations.
+
+## Tuần 4 – Kiểm thử với số nguyên lớn (100.000–1.000.000 chữ số)
+
+### 1. Mục tiêu
+
+Bổ sung các bộ dữ liệu kiểm thử đa dạng nhằm đánh giá khả năng xử lý và kiểm tra kết quả của thuật toán Karatsuba với số nguyên lớn.
+### Các bộ dữ liệu kiểm thử mới (New Test Cases)
+
+| Tên file | Kích thước đầu vào | Đặc điểm |
+|---|---|---|
+| `test200000digits.txt` | 200.000 × 200.000 | Chữ số ngẫu nhiên |
+| `test300000digits.txt` | 300.000 × 300.000 | Chữ số lặp lại theo quy luật |
+| `test500000digits.txt` | 500.000 × 500.000 | Chứa nhiều chữ số 0 |
+| `test750000digits.txt` | 750.000 × 750.000 | Chữ số ngẫu nhiên |
+| `test100000Identity.txt` | 100.000 × 1 | Phép nhân với 1 |
+| `test200000PowerOfTen.txt` | 200.000 × 200.000 | Phép nhân với lũy thừa của 10 |
+| `test1000000Identity.txt` | 1.000.000 × 1 | Phép nhân với 1 |
+### 2. Các file được bổ sung
+
+- `generateTests.cpp`: Tạo dữ liệu 200.000, 300.000, 500.000 và 750.000 chữ số với các quy luật khác nhau (ngẫu nhiên, lặp lại, nhiều chữ số 0).
+- `generateExactTests.cpp`: Tạo các trường hợp nhân với 1 và lũy thừa của 10 để kiểm tra kết quả chính xác.
+- `week4Test.cpp`: Thực hiện phép nhân Karatsuba, đo thời gian và kiểm tra kết quả.
+- `week4_results.txt`: Lưu kết quả các lần kiểm thử.
+- `test/`: Chứa 7 bộ dữ liệu kiểm thử mới.
+
+### 3. Hướng dẫn chạy
+
+Biên dịch chương trình kiểm thử:
+
+```powershell
+g++ -O2 -std=c++17 week4Test.cpp handleInput.cpp karatsuba.cpp multiplySigned.cpp schoolbookMultiply.cpp -o week4Test.exe
+```
+
+Chạy thử một bộ dữ liệu:
+
+```powershell
+.\week4Test.exe .\test\test200000digits.txt
+```
+
+### 4. Kết quả kiểm thử
+
+Sử dụng thuật toán Karatsuba với cutoff = 64.
+
+| Kích thước đầu vào | Thời gian thực thi | Kết quả kiểm tra |
+|---|---:|---|
+| 200.000 × 200.000 | 19,3369 giây | PASS |
+| 300.000 × 300.000 | 50,2301 giây | PASS |
+| 500.000 × 500.000 | 141,598 giây | PASS |
+| 750.000 × 750.000 | 465,276 giây | PASS |
+| 1.000.000 × 1.000.000 | 537,903 giây | PASS |
+
+Ngoài ra, 3 trường hợp kiểm thử với kết quả xác định trước (nhân với 1 và lũy thừa của 10) đều **PASS**.
+
+### 5. Phương pháp kiểm tra
+
+- **Length check:** Kiểm tra số chữ số của kết quả.
+- **Modulo verification:** Kiểm tra phép nhân thông qua 3 số nguyên tố.
+- **Exact-result comparison:** So sánh toàn bộ kết quả với đáp án xác định trước.
+- **Schoolbook comparison:** So sánh với thuật toán Schoolbook đối với dữ liệu nhỏ.
+
+*Lưu ý:* Kiểm tra modulo không đảm bảo tuyệt đối tính chính xác của toàn bộ kết quả.
+
+### 6. Tổng kết
+
+Đã bổ sung 7 bộ dữ liệu mới và kiểm thử thêm bộ dữ liệu 1.000.000 chữ số có sẵn. **Cả 8 lần chạy đều vượt qua các phép kiểm tra tương ứng.**
+
+Chi tiết xem tại [`week4_results.txt`](week4_results.txt).
