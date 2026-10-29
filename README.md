@@ -4,7 +4,7 @@
 
 **Instructor:** Huynh Xuan Phung
 
-**Student(s):** [Add the name(s) and student ID(s); maximum two students]
+**Student(s):** Nguyen Le Khanh Duy - 25110011, Nguyen Tran Khanh Linh - 25110036
 
 ## 1. Project Overview
 
