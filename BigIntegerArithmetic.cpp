@@ -63,7 +63,16 @@ int main(int argc, char **argv)
     "test5000digits.txt",
     "test10000digits.txt",
     "test20000digits.txt",
-    "test100000digits.txt"
+    "test100000digits.txt",
+    "test200000digits.txt",
+    "test300000digits.txt",
+    "test500000digits.txt",
+    "test750000digits.txt",
+    "test1000000digits.txt",
+    "test1000000Identity.txt",
+    "test100000Identity.txt",
+    "test200000PowerOfTen.txt",
+    
 };
         // duyệt từng file test
         for (int i = 0; i < sizeof(testFiles) / sizeof(testFiles[0]); ++i) // for (int i = 0; i < 8; i++)
