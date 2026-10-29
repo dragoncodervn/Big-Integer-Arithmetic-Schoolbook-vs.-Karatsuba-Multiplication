@@ -16,7 +16,8 @@ string add(string num1, string num2)
     num1 = normalizeUnsigned(num1);
     num2 = normalizeUnsigned(num2);
 
-    string result = ""; // chuỗi rỗng để lưu kết quả phép cộng
+    string result; // lưu các chữ số theo thứ tự từ hàng đơn vị lên
+    result.reserve(max(num1.length(), num2.length()) + 1);
     int carry = 0; // số nhớ khi cộng
     //bắt đầu từ chữ số cuối cùng (hàng đơn vị)
     int i = num1.length() - 1; 
@@ -35,11 +36,11 @@ string add(string num1, string num2)
         if (j >= 0)
             sum += num2[j--] - '0';
         carry = sum / 10; // lấy số nhớ
-        result.insert(result.begin(), (sum % 10) + '0');
-        //lấy hàng đơn vị rồi chèn vào đầu kết quả
+        result.push_back((sum % 10) + '0');
         //sum % 10 lấy chữ số hàng đơn vị. Ví dụ 15 % 10 = 5.
-        //insert(result.begin(), ...) chèn chữ số vào đầu chuỗi kết quả.; chèn vào đầu vì ta đang tính từ phải sang trái
+        //push_back thêm vào cuối với chi phí O(1); chuỗi được đảo ngược một lần sau vòng lặp
     }
+    reverse(result.begin(), result.end());
     return normalizeUnsigned(result);
 }
 
@@ -52,6 +53,7 @@ string subtractPositive(const string& num1, const string& num2) // trừ từng 
         throw invalid_argument("subtractPositive requires the first operand to be greater than or equal to the second.");
 
     string result;
+    result.reserve(normalizedNum1.length());
     int borrow = 0;
     int i = static_cast<int>(normalizedNum1.length()) - 1;
     int j = static_cast<int>(normalizedNum2.length()) - 1;
@@ -73,15 +75,14 @@ string subtractPositive(const string& num1, const string& num2) // trừ từng 
         {
             borrow = 0; // khôgn cần mượn nữa
         }
-        result.insert(result.begin(), diff + '0');// Chèn chữ số vừa tính vào đầu chuỗi kết quả
+        result.push_back(diff + '0');// Thêm chữ số vừa tính vào cuối (O(1)); đảo ngược một lần sau vòng lặp
         i--;// chuyển sang chữ số tiếp theo bên trái
     }
-    // xóa các số 0 thừa ở đầu, nhưng vẫn giữ lại một chữ số
-    while (result.length() > 1 && result[0] == '0')
-        result.erase(result.begin());
 
     if (borrow != 0)
         throw logic_error("subtractPositive ended with an unhandled borrow.");
+    reverse(result.begin(), result.end());
+    // normalizeUnsigned xóa các số 0 thừa ở đầu trong một lượt duyệt, nhưng vẫn giữ lại một chữ số
     return normalizeUnsigned(result);
 }
 // So sánh hai số không âm, quyết định thứ tự trừ và dấu của kết quả
