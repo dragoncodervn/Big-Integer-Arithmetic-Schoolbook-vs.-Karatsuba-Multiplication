@@ -1,240 +1,237 @@
-# Big Integer Arithmetic
+# Big Integer Arithmetic: Schoolbook vs. Karatsuba Multiplication
 
-So sánh phép nhân số nguyên rất lớn bằng hai thuật toán:
+**Course:** DASA230179_Dot1 - HK1 2026-2027
 
-- **Schoolbook multiplication**: nhân từng cặp chữ số, độ phức tạp `O(n^2)`.
-- **Karatsuba multiplication**: chia để trị, giảm số phép nhân cần thực hiện và có độ phức tạp lý thuyết khoảng `O(n^log2(3))`.
+**Instructor:** Huynh Xuan Phung
 
-Chương trình biểu diễn số bằng `std::string`, vì vậy không phụ thuộc vào giới hạn của các kiểu số nguyên dựng sẵn. Chương trình hỗ trợ số dương, số âm, số 0, số có các chữ số 0 ở đầu và kiểm tra ký tự đầu vào không hợp lệ.
+**Student(s):** [Add the name(s) and student ID(s); maximum two students]
 
-Karatsuba dùng Schoolbook khi một trong hai toán hạng có độ dài nhỏ hơn hoặc bằng `cutoff`. Giá trị mặc định là 32 chữ số (`DEFAULT_KARATSUBA_CUTOFF`); có thể thay đổi giá trị `cutoff` trong `BigIntegerArithmetic.cpp` để benchmark với ngưỡng khác. `cutoff` phải lớn hơn 0.
+## 1. Project Overview
 
-## Cấu trúc chính
+This project implements decimal big-integer multiplication using two algorithms:
 
-| Tệp | Chức năng |
+- **Schoolbook multiplication**, which multiplies each pair of input digits.
+- **Karatsuba multiplication**, which recursively splits each operand and reduces the number of recursive multiplications.
+
+The program compares their output and execution time over test inputs ranging from small values to operands with up to 1,000,000 digits. It also benchmarks Karatsuba with several base-case cutoff values.
+
+**Reference:** *The Art of Computer Programming*, Volume 2, Chapter 4: arithmetic and multiplication algorithms.
+
+## 2. Scope and Design
+
+### 2.1 Representation and input handling
+
+Operands are stored as decimal `std::string` values, not as an array or list of multi-digit limbs. This makes decimal input and output straightforward, but string allocation and copying affect performance.
+
+Input handling:
+
+- Accepts an optional leading `-` and decimal digits.
+- Rejects empty values, a lone minus sign, whitespace, and non-digit characters.
+- Removes leading zeroes while preserving zero as `"0"`.
+- Normalizes negative zero to `"0"`.
+- Applies sign handling outside the unsigned multiplication algorithms.
+
+For file-based tests, the program reads the first two lines of each input file as the operands. A valid test needs two non-empty lines.
+
+### 2.2 Source files
+
+| File | Purpose |
 |---|---|
-| `BigIntegerArithmetic.cpp` | Điểm bắt đầu chương trình, chạy các test và ghi kết quả |
-| `handleInput.cpp/.hpp` | Đọc, kiểm tra và chuẩn hóa dữ liệu đầu vào |
-| `schoolbookMultiply.cpp/.hpp` | Cài đặt phép nhân Schoolbook |
-| `karatsuba.cpp/.hpp` | Cài đặt phép cộng, phép trừ và phép nhân Karatsuba |
-| `multiplySigned.cpp/.hpp` | Xử lý dấu trước và sau khi nhân |
-| `benchmark.cpp/.hpp` | Đo thời gian chạy và in kết quả |
-| `test/` | Các tệp dữ liệu kiểm thử |
-| `output.txt` | Kết quả benchmark khi chạy chế độ kiểm thử tự động |
+| `BigIntegerArithmetic.cpp` | Program entry point; selects test files and cutoff values, then runs benchmarks |
+| `handleInput.cpp`, `handleInput.hpp` | Input validation, normalization, and unsigned number comparison |
+| `schoolbookMultiply.cpp`, `schoolbookMultiply.hpp` | Schoolbook multiplication |
+| `karatsuba.cpp`, `karatsuba.hpp` | Big-integer addition, subtraction, and Karatsuba multiplication |
+| `multiplySigned.cpp`, `multiplySigned.hpp` | Removes and reapplies operand signs around multiplication |
+| `benchmark.cpp`, `benchmark.hpp` | Times a multiplication call and writes operands, result, result length, and elapsed time |
+| `test\` | Text input files used by the default test run |
+| `output.txt` | Generated benchmark output; overwritten by a default test run |
 
-## Yêu cầu
+The repository currently has no separate automated test executable or test framework. The main program runs benchmarks and prints their results; it does not automatically compare every result to an independent expected value.
 
-- Trình biên dịch C++ có hỗ trợ C++11 trở lên.
-- `g++` hoặc MinGW trên Windows.
+### 2.3 Schoolbook multiplication
 
-## Biên dịch
+For operands of `p` and `q` digits, the implementation stores partial digits in a result vector and uses nested loops to multiply every digit of one operand by every digit of the other.
 
-Mở Terminal/Command Prompt tại thư mục gốc của dự án và chạy:
+### 2.4 Karatsuba multiplication
 
-```cmd
-g++ BigIntegerArithmetic.cpp benchmark.cpp handleInput.cpp karatsuba.cpp multiplySigned.cpp schoolbookMultiply.cpp -o BigIntegerArithmetic
-```
-OR
-```cmd
-g++ *cpp -o BigIntegerArithmetic
-```
-
-## Chạy chương trình
-
-### Chạy toàn bộ test có sẵn
-
-Chạy từ thư mục gốc của dự án:
-
-Windows:
-```cmd
-BigIntegerArithmetic.exe
-```
-
-Linux:
-```terminal
-./BigIntegerArithmetic.exe
-```
-
-Chương trình sẽ:
-
-1. Đọc lần lượt các tệp trong thư mục `test\`.
-2. Bỏ qua các tệp có dữ liệu rỗng hoặc không hợp lệ.
-3. Chạy cả Schoolbook và Karatsuba với các dữ liệu hợp lệ.
-4. Ghi kết quả, độ dài kết quả và thời gian thực thi vào `output.txt`.
-
-Việc chạy test `test100000digits.txt` có thể mất nhiều thời gian vì chương trình thực hiện phép nhân với số có 100.000 chữ số.
-
-### Chạy với hai số cụ thể
-
-Mã nguồn có nhánh xử lý khi chương trình được gọi với hai tham số dòng lệnh (`argc == 3`). Tuy nhiên, phiên bản hiện tại vẫn gọi hàm đọc dữ liệu từ `stdin` trong nhánh này. Vì vậy, để chạy ổn định theo thiết kế hiện tại, hãy chạy chế độ kiểm thử mặc định ở trên hoặc cung cấp hai dòng số qua đầu vào chuẩn:
-
-Windows:
-```cmd
-BigIntegerArithmetic.exe 123 456
-```
-Linux:
-```terminal
-./BigIntegerArithmetic 123 456
-```
-
-Kết quả của hai thuật toán trong chế độ này được in trực tiếp ra màn hình. Hai số cần nằm trên hai dòng riêng biệt và chỉ được chứa chữ số, có thể có một dấu `-` ở đầu.
-
-*P/S: Các số trong hai lệnh chạy trên chỉ là ví dụ.
-
-## Định dạng tệp test
-
-Mỗi tệp test hợp lệ phải có đúng hai dòng không rỗng:
+For two operands split at `m` digits:
 
 ```text
-123456789
--987654321
+x = a * 10^m + b
+y = c * 10^m + d
+
+P1 = a * c
+P2 = b * d
+P3 = (a + b) * (c + d)
+ad + bc = P3 - P1 - P2
+x * y = P1 * 10^(2m) + (P3 - P1 - P2) * 10^m + P2
 ```
 
-Các trường hợp được kiểm thử trong thư mục `test\` gồm:
-
-- Số có độ dài 3, 100, 10.000 và 100.000 chữ số.
-- Số âm và các tổ hợp dấu.
-- Nhân với số 0 và số chỉ có một chữ số.
-- Số có các chữ số trùng nhau.
-- Số có các chữ số 0 ở đầu.
-- Dòng rỗng, ký tự không hợp lệ và dấu âm không hợp lệ.
-
-## Định dạng kết quả
-
-Mỗi lần benchmark ghi các thông tin sau:
+Karatsuba computes three recursive products rather than four. When either operand has at most `cutoff` digits, the implementation switches to Schoolbook. The benchmark currently tests:
 
 ```text
-Function name: multiply
-Num1: ...
-Num2: ...
-Result: ...
-Result length: ...
-Execution time: ... seconds
+2, 4, 8, 16, 24, 32, 48, 64, 96, 128, 192, 256, 512
 ```
 
-Kết quả của Schoolbook và Karatsuba có thể đối chiếu với nhau để kiểm tra tính đúng đắn. Thời gian thực thi phụ thuộc vào máy, trình biên dịch và kích thước dữ liệu.
+The cutoff must be greater than zero. There is no single production cutoff selected by the code; the listed values are benchmark candidates.
 
-## Thêm test mới
+## 3. Time Complexity
 
-1. Tạo một tệp `.txt` trong thư mục `test\`.
-2. Ghi hai số cần nhân vào hai dòng đầu tiên.
-3. Thêm tên tệp vào mảng `testFiles` trong `BigIntegerArithmetic.cpp`.
-4. Biên dịch lại chương trình.
-5. Chạy `BigIntegerArithmetic.exe` và xem kết quả trong `output.txt`.
+Let `p` and `q` be the operand lengths, and assume `p >= q`. Results expressed in terms of `n` assume operands of approximately equal length (`p ~= q ~= n`).
 
-### Kiểm thử hồi quy cutoff Karatsuba
+### 3.1 Schoolbook
 
-Biên dịch và chạy kiểm thử hồi quy riêng (bao gồm trường hợp cutoff 2 gây lỗi trước đây, số ngẫu nhiên 3–12 chữ số và đầu vào lớn):
+The nested loops process `p * q` digit pairs. Initializing the result vector and formatting the answer adds `O(p + q)` work:
 
-```cmd
-g++ -std=c++11 test\karatsubaCutoffRegression.cpp karatsuba.cpp schoolbookMultiply.cpp handleInput.cpp -o karatsubaCutoffRegression.exe
-karatsubaCutoffRegression.exe
+```text
+T(p, q) = Theta(p * q + p + q) = Theta(p * q)
 ```
 
-## Lưu ý
+For balanced operands, this becomes **Theta(n^2)**. For operands with very different lengths, the multiplication work depends on `p * q`, not necessarily `n^2`.
 
-- Phải chạy chương trình từ thư mục gốc của dự án để đường dẫn tương đối `test\...` hoạt động.
-- Mỗi lần chạy chế độ test, `output.txt` được mở ở chế độ ghi mới nên kết quả cũ sẽ bị ghi đè.
-- Nếu chương trình không tìm thấy tệp test, hãy kiểm tra thư mục hiện tại và bảo đảm thư mục `test\` tồn tại.
+### 3.2 Karatsuba under the linear-addition assumption
 
+If addition, subtraction, and result assembly each take linear time, the three recursive calls have size about `n/2`, and the work outside recursion is linear:
 
-## Week 3 – Large Integer Testing & Benchmark
+```text
+T(n) = 3T(n/2) + Theta(n)
+```
 
-### 1. Work Completed
-- Created `generateTests.cpp` to generate reproducible large-number test cases using a fixed random seed (`2026`).
-- Added three test files: `test1000digits.txt`, `test5000digits.txt`, and `test20000digits.txt`.
-- Updated `BigIntegerArithmetic.cpp` to run 18 test files.
-- Updated `output.txt` with the complete test results.
+By the Master Theorem:
 
-### 2. Testing Results
-- Total: 18 test files.
-- Valid cases: 14 PASS, 0 FAIL (Schoolbook and Karatsuba produced identical results).
-- Invalid/incomplete cases: 4 skipped.
+```text
+T(n) = Theta(n^(log2(3))) ~= Theta(n^1.585)
+```
 
-### 3. Performance Comparison
+This is the theoretical Karatsuba bound when auxiliary arithmetic is linear. A fixed cutoff changes constants and the base-case work, but not the asymptotic exponent under this model.
 
-| Digits | Schoolbook (s) | Karatsuba (s) | Speedup |
-|---|---:|---:|---:|
-| 1,000 | 0.00260 | 0.00225 | 1.16× |
-| 5,000 | 0.07285 | 0.03037 | 2.40× |
-| 10,000 | 0.25011 | 0.13294 | 1.88× |
-| 20,000 | 1.02387 | 0.39301 | 2.61× |
-| 100,000 | 24.21490 | 5.35360 | 4.52× |
+### 3.3 Complexity caveat for this implementation
 
-*Times are from individual benchmark runs, not averages.*
+In the current `karatsuba.cpp`, `add` and `subtractPositive` insert each output digit at the beginning of a `std::string` using `insert(result.begin(), ...)`. Inserting at the beginning may shift the digits already in the string, so an addition or subtraction of `n` digits can take **Theta(n^2)** time.
 
-### 4. Conclusion
-Karatsuba outperformed Schoolbook in all five measured cases. At 100,000 digits, Karatsuba was approximately **4.52 times faster**.
+With that cost, the recurrence for the current implementation can be:
 
-The results are consistent with the theoretical complexities:
-- Schoolbook: `O(n²)`
-- Karatsuba: `O(n^1.585)`
+```text
+T(n) = 3T(n/2) + Theta(n^2) = Theta(n^2)
+```
 
-Inputs containing `10^20` digits were not tested due to hardware and storage limitations.
+Therefore, distinguish the theoretical Karatsuba bound from the complexity of this specific string implementation. Karatsuba may still be faster for measured input sizes, but the current implementation does not guarantee a Theta(n^1.585) asymptotic running time. Building output from right to left in a buffer and reversing once would avoid repeated front insertion.
 
-## Tuần 4 – Kiểm thử với số nguyên lớn (100.000–1.000.000 chữ số)
+### 3.4 Comparison
 
-### 1. Mục tiêu
+| Algorithm | Recursive digit multiplications | Balanced-input time | Assumption / note |
+|---|---:|---:|---|
+| Schoolbook | `p * q` digit pairs | `Theta(n^2)` | Direct nested-loop implementation |
+| Karatsuba, theoretical | 3 subproblems of size about `n/2` | `Theta(n^1.585)` | Addition and subtraction are `Theta(n)` |
+| Karatsuba, current code | 3 subproblems of size about `n/2` | Can be `Theta(n^2)` | Front insertion can make auxiliary arithmetic quadratic |
 
-Bổ sung các bộ dữ liệu kiểm thử đa dạng nhằm đánh giá khả năng xử lý và kiểm tra kết quả của thuật toán Karatsuba với số nguyên lớn.
-### Các bộ dữ liệu kiểm thử mới (New Test Cases)
+## 4. Test Data and Benchmark Behavior
 
-| Tên file | Kích thước đầu vào | Đặc điểm |
-|---|---|---|
-| `test200000digits.txt` | 200.000 × 200.000 | Chữ số ngẫu nhiên |
-| `test300000digits.txt` | 300.000 × 300.000 | Chữ số lặp lại theo quy luật |
-| `test500000digits.txt` | 500.000 × 500.000 | Chứa nhiều chữ số 0 |
-| `test750000digits.txt` | 750.000 × 750.000 | Chữ số ngẫu nhiên |
-| `test100000Identity.txt` | 100.000 × 1 | Phép nhân với 1 |
-| `test200000PowerOfTen.txt` | 200.000 × 200.000 | Phép nhân với lũy thừa của 10 |
-| `test1000000Identity.txt` | 1.000.000 × 1 | Phép nhân với 1 |
-### 2. Các file được bổ sung
+### 4.1 Test cases currently configured
 
-- `generateTests.cpp`: Tạo dữ liệu 200.000, 300.000, 500.000 và 750.000 chữ số với các quy luật khác nhau (ngẫu nhiên, lặp lại, nhiều chữ số 0).
-- `generateExactTests.cpp`: Tạo các trường hợp nhân với 1 và lũy thừa của 10 để kiểm tra kết quả chính xác.
-- `week4Test.cpp`: Thực hiện phép nhân Karatsuba, đo thời gian và kiểm tra kết quả.
-- `week4_results.txt`: Lưu kết quả các lần kiểm thử.
-- `test/`: Chứa 7 bộ dữ liệu kiểm thử mới.
+`BigIntegerArithmetic.cpp` lists 26 files:
 
-### 3. Hướng dẫn chạy
+| Category | Files |
+|---|---|
+| Small and repeated values | `test3digits.txt`, `test100digits.txt`, `testDuplicateValues.txt`, `testDuplicateDigitsValues.txt` |
+| Sign handling | `testNegativePositive.txt`, `testPositiveNegative.txt`, `testNegativeNegative.txt`, `testNegativeZero.txt` |
+| Input validation / incomplete input | `testEmptyInput.txt`, `testSingleElement.txt`, `testInvalidCharacters.txt`, `testInvalidSign.txt` |
+| Leading zeroes | `testLeadingZeros.txt` |
+| Operand sizes | `test1000digits.txt`, `test5000digits.txt`, `test10000digits.txt`, `test20000digits.txt`, `test100000digits.txt`, `test200000digits.txt`, `test300000digits.txt`, `test500000digits.txt`, `test750000digits.txt`, `test1000000digits.txt` |
+| Special large operands | `test100000Identity.txt`, `test1000000Identity.txt`, `test200000PowerOfTen.txt` |
 
-Biên dịch chương trình kiểm thử:
+`testEmptyInput.txt` is empty, and `testSingleElement.txt` contains only one line; both are intentionally rejected by the two-line input reader. Invalid-character and invalid-sign files are also expected to be skipped. The remaining files are intended as valid multiplication inputs.
+
+### 4.2 What a benchmark run does
+
+With no command-line arguments, the program:
+
+1. Opens each configured input under the relative path `test\`.
+2. Reads and validates the first two lines.
+3. Runs Schoolbook once and Karatsuba once for each of the 13 cutoff values when the input is valid.
+4. Writes the operands, result, result length, and measured multiplication time to `output.txt`.
+5. Reports invalid or incomplete inputs as skipped.
+
+The timer covers the multiplication call, not the subsequent output formatting. Since the benchmark writes both large operands and the result for every algorithm/cutoff, `output.txt` can become very large. Each default run overwrites the previous output.
+
+The current test path uses a Windows backslash (`test\\`), so the default file-based runner is Windows-oriented. Running from the repository root is required for its relative paths to resolve.
+
+With exactly two command-line arguments, the program treats them as the operands, validates them, and prints one Schoolbook benchmark plus 13 Karatsuba benchmarks to the console:
 
 ```powershell
-g++ -O2 -std=c++17 week4Test.cpp handleInput.cpp karatsuba.cpp multiplySigned.cpp schoolbookMultiply.cpp -o week4Test.exe
+.\BigIntegerArithmetic.exe 123 456
 ```
 
-Chạy thử một bộ dữ liệu:
+The benchmark output shows results and timing but does not itself assert that Schoolbook and Karatsuba results match. Check correctness separately when changing the arithmetic implementation or cutoff.
+
+### 4.3 Interpreting `output.txt`
+
+`output.txt` is generated data, not a maintained specification. It reflects the last default test run and can be stale if the test list or source has changed since that run. Re-run the program before using its contents as evidence for the current source.
+
+The existing benchmark data has been analyzed using the median of per-test normalized times: for each test, divide each cutoff's time by the fastest cutoff's time for that same test, then take the median across tests. In that data, cutoff **96** had the lowest median ratio (about **1.061x** across 16 complete tests and **1.012x** across 7 tests with at least 1,000 digits). This is an empirical result for one set of runs, not a universal optimum.
+
+Summing raw times can produce a different winner because the largest tests dominate the total; in the analyzed data, cutoff 16 had a slightly lower summed time than cutoff 96. Each case was measured once, so system load and timing noise may materially affect either result. Repeated runs and median timings are recommended before selecting a cutoff for a particular machine.
+
+## 5. Build and Run
+
+### Requirements
+
+- A C++ compiler with C++11 support.
+- `g++` / MinGW on Windows.
+- Run commands from the repository root so the relative `test\` paths work.
+
+### Build with g++
+
+In Windows PowerShell:
 
 ```powershell
-.\week4Test.exe .\test\test200000digits.txt
+g++ -O2 -std=c++11 BigIntegerArithmetic.cpp benchmark.cpp handleInput.cpp karatsuba.cpp multiplySigned.cpp schoolbookMultiply.cpp -o BigIntegerArithmetic.exe
 ```
 
-### 4. Kết quả kiểm thử
+`-O2` enables compiler optimizations in the executable. It does not change the algorithm, and the actual speedup depends on the compiler and machine. `-O3` can also be measured, but is not guaranteed to be faster than `-O2`.
 
-Sử dụng thuật toán Karatsuba với cutoff = 64.
+### Run the configured test suite
 
-| Kích thước đầu vào | Thời gian thực thi | Kết quả kiểm tra |
-|---|---:|---|
-| 200.000 × 200.000 | 19,3369 giây | PASS |
-| 300.000 × 300.000 | 50,2301 giây | PASS |
-| 500.000 × 500.000 | 141,598 giây | PASS |
-| 750.000 × 750.000 | 465,276 giây | PASS |
-| 1.000.000 × 1.000.000 | 537,903 giây | PASS |
+```powershell
+.\BigIntegerArithmetic.exe
+```
 
-Ngoài ra, 3 trường hợp kiểm thử với kết quả xác định trước (nhân với 1 và lũy thừa của 10) đều **PASS**.
+This runs all configured files and overwrites `output.txt`. The largest test inputs can make a full run take a long time.
 
-### 5. Phương pháp kiểm tra
+### Run a pair of numbers
 
-- **Length check:** Kiểm tra số chữ số của kết quả.
-- **Modulo verification:** Kiểm tra phép nhân thông qua 3 số nguyên tố.
-- **Exact-result comparison:** So sánh toàn bộ kết quả với đáp án xác định trước.
-- **Schoolbook comparison:** So sánh với thuật toán Schoolbook đối với dữ liệu nhỏ.
+```powershell
+.\BigIntegerArithmetic.exe 123 456
+```
 
-*Lưu ý:* Kiểm tra modulo không đảm bảo tuyệt đối tính chính xác của toàn bộ kết quả.
+The two values may include a leading minus sign. Results and timings are printed to the terminal.
 
-### 6. Tổng kết
+## 6. Example and Correctness Evidence
 
-Đã bổ sung 7 bộ dữ liệu mới và kiểm thử thêm bộ dữ liệu 1.000.000 chữ số có sẵn. **Cả 8 lần chạy đều vượt qua các phép kiểm tra tương ứng.**
+A hand-checkable example is:
 
-Chi tiết xem tại [`week4_results.txt`](week4_results.txt).
+```text
+678 * 345 = 233910
+```
+
+The partial products are `678 * 5 = 3390`, `678 * 40 = 27120`, and `678 * 300 = 203400`; their sum is `233910`. A sample run of the current executable produced `233910` for Schoolbook and the tested Karatsuba cutoffs.
+
+Another Karatsuba recombination example is:
+
+```text
+1234 * 5678 = 7006652
+```
+
+Large input files demonstrate the scale the program can read and process. They do not alone prove that the entire product is correct. The benchmark currently prints results without an independent expected-result assertion; use exact expected values or an independent verification method when making correctness claims.
+
+## 7. Project Requirements Self-Explanation
+
+1. **Big-integer representation and arithmetic:** operands use decimal strings; normalization, comparison, addition, and subtraction support the multiplication algorithms. This is not a limb-array representation.
+2. **Schoolbook:** the nested loops process `p * q` digit pairs, giving `Theta(pq)` time and `Theta(n^2)` for balanced operands.
+3. **Karatsuba and cutoff:** the algorithm uses three recursive products and falls back to Schoolbook at the cutoff. The theoretical `Theta(n^1.585)` bound assumes linear auxiliary arithmetic; front insertion in the current string routines can make them quadratic.
+4. **Benchmark:** the configured suite includes ordinary, invalid, signed, special-value, and large-input cases. A benchmark run measures one Schoolbook call and 13 Karatsuba cutoffs per valid input.
+5. **Recurrence and measured behavior:** under linear addition/subtraction, `T(n) = 3T(n/2) + Theta(n)` solves to `Theta(n^1.585)`. Actual timings depend on this implementation, cutoff, compiler flags, machine, and test data.
+6. **Test evidence:** small examples can be checked by hand; large cases should be checked against an independent expected result or verifier. Timing alone is not correctness evidence.
+7. **The best choice of cutoff:** 96 is the best choice of cutoff. Based on the median of the normalized time ratios across individual tests, a cutoff of 96 performs best: a median of 1.061× across 16 tests and 1.012× across 7 large tests. 
+
+
